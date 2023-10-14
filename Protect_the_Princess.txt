@@ -1,0 +1,340 @@
+//these variables control when the end screen is displayed
+var gameEnd = true;
+
+//these variables help do things with the objects that will be used in game
+var princess;
+var heavy;
+var troll;
+var gloopball;
+
+//powerup pill variables
+var PILL_SIZE = 5;
+var speedPill;
+var sizePill;
+
+//these variables will be used to display the score
+var scoreboard;
+var scorecounter = 0;
+
+//will be used to make objects move, collide, etc
+var whichTroll = Randomizer.nextInt(1, 4);
+var GLOOPRADIUS = 10;
+var gloopBaseSpeed = 1;
+var gloopDX = gloopBaseSpeed;
+var gloopDY = gloopBaseSpeed;
+var gloopDirection;
+var collideCheck;
+var heavyMove = 20;
+var heavyDirection;
+var heavyCollide;
+var heavySize = 80;
+var gameScreen;
+
+//keybinds are set, loading screen is displayed
+function start(){
+    keyDownMethod(keybinds);
+    startGame();
+}
+
+//directions to control the ball's behaviour
+var north;
+var south;
+var east;
+var west;
+
+//draws the game objects, makes the ball work, 
+function game(){
+    gameEnd = false;
+    chars();
+    setTimer(gloopballStuff, 20);
+}
+
+//this function makes all the characters
+function chars(){
+    gameScreen = new WebImage("https://codehs.com/uploads/171cfcd5a59ff5dec3af997e16a6f151");
+    gameScreen.setSize(getWidth(), getHeight());
+    gameScreen.setPosition(0, 0);
+        
+    princess = new WebImage("https://codehs.com/uploads/b119f66dc2e9f85961b2dfaf3a859eb3");
+    princess.setSize(100, 100);
+    princess.setPosition(getWidth() / 2 - princess.getWidth() / 2, getHeight() / 2 - princess.getHeight() / 2);
+        
+    heavy = new WebImage("https://codehs.com/uploads/7c168a8d9440ba6fe4b398e2e97fc8bb");
+    heavy.setSize(heavySize, heavySize);
+    heavy.setPosition(princess.getX(), princess.getY() - heavy.getHeight());
+    
+    add(gameScreen);
+    add(princess);
+    add(heavy);
+    
+    drawTroll(0, 0);
+    drawTroll(getWidth() - troll.getWidth(), 0);
+    drawTroll(0, getHeight() - troll.getHeight());
+    drawTroll(getWidth() - troll.getWidth(), getHeight() - troll.getHeight());
+    
+    drawGloopball();
+    score();
+}
+
+/*
+//draws random powerup pills in random places that are far away enough from the trolls to be reachable
+function powerups(){
+    var pillXAS = 0 + troll.getWidth();
+    var pillXAE = getWidth() - troll.getWidth();
+    var pillYAS = 0 + troll.getHeight();
+    var pillYAE = getHeight() - troll.getHeight();
+    
+    var whichPower = Randomizer.nextInt(1, 2);
+    var pillX = Randomizer.nextInt(pillXAS, pillXAE);
+    var pillY = Randomizer.nextInt(pillYAS, pillYAE);
+    
+    if(whichPower == 1){
+        speedPill = new Circle(PILL_SIZE);
+        speedPill.setPosition(pillX, pillY);
+        speedPill.setColor(Color.red);
+        add(speedPill);
+    }
+    if(whichPower == 2){
+        sizePill = new Circle(PILL_SIZE);
+        sizePill.setPosition(pillX, pillY);
+        sizePill.setColor(Color.blue);
+        add(sizePill);
+    }
+}
+*/
+
+//function to display score
+function score(){
+    var scorecount = scorecounter;
+    scoreboard = new Text("Score: " + scorecount, "30pt Chewy");
+    scoreboard.setPosition(getWidth() / 2 - scoreboard.getWidth() / 2, 0 + scoreboard.getHeight());
+    scoreboard.setColor(Color.cyan);
+    add(scoreboard);
+}
+
+//need a function for troll since im gonna make 4 of him
+function drawTroll(xPos, yPos){
+    troll = new WebImage("https://codehs.com/uploads/19ffef020322824a102939526059d8fe");
+    troll.setSize(100, 100);
+    troll.setPosition(xPos, yPos);
+    add(troll);
+}
+
+//this function sets our controls for the game
+function keybinds(e){
+    if(gameEnd == false){
+    if(e.keyCode == Keyboard.letter('W')){
+        //move character up
+        heavy.move(0, -heavyMove);
+        heavyDirection = north;
+    }
+    if(e.keyCode == Keyboard.letter('S')){
+        //move character down
+        heavy.move(0, heavyMove);
+        heavyDirection = south;
+    }
+    if(e.keyCode == Keyboard.letter('A')){
+        //move character left
+        heavy.move(-heavyMove, 0);
+        heavyDirection = west;
+    }
+    if(e.keyCode == Keyboard.letter('D')){
+        //move character right
+        heavy.move(heavyMove, 0);
+        heavyDirection = east;
+    }
+    }
+    if(e.keyCode == Keyboard.letter('E') && gameEnd == true){
+        game();
+    }
+}
+
+//collects gloopball code in one function
+function gloopballStuff(){
+    gloopBounce();
+    gloopball.move(gloopDX, gloopDY);
+    gloopCollision();
+}
+
+//makes the gloopball
+function drawGloopball(){
+    whichTroll = Randomizer.nextInt(1, 4);
+    gloopball = new Circle(GLOOPRADIUS);
+    gloopball.setColor(Color.green);
+    if(whichTroll == 1){
+        gloopball.setPosition(0 + troll.getWidth() / 2, 0 + troll.getHeight() / 2);
+        add(gloopball);
+    }
+    if(whichTroll == 2){
+        gloopball.setPosition(getWidth() - troll.getWidth() / 2, 0 + troll.getHeight() / 2);
+        add(gloopball);
+    }
+    if(whichTroll == 3){
+        gloopball.setPosition(0 + troll.getWidth() / 2, getHeight() - troll.getHeight() / 2);
+        add(gloopball);
+    }
+    if(whichTroll == 4){
+        gloopball.setPosition(getWidth() - troll.getWidth() / 2, getHeight() - troll.getHeight() / 2);
+        add(gloopball);
+    }
+}
+
+//makes the gloopball bounce off walls
+function gloopBounce(){
+	// Bounce off right wall, speed up
+	var speedchange = 1;
+	if(gloopball.getX() + gloopball.getRadius() > getWidth()){
+		gloopDX = -gloopDX;
+		gloopDX -= speedchange;
+		gloopDirection = west;
+	}
+	// Bounce off left wall, speed up
+	if(gloopball.getX() - gloopball.getRadius() < 0){
+		gloopDX = -gloopDX;
+		gloopDX += speedchange;
+		gloopDirection = east;
+	}
+	// Bounce off bottom wall, speed up
+	if(gloopball.getY() + gloopball.getRadius() > getHeight()){
+		gloopDY = -gloopDY;
+		gloopDY -= speedchange;
+		gloopDirection = north;
+	}
+	// Bounce off top wall, speed up
+	if(gloopball.getY() - gloopball.getRadius() < 0){
+		gloopDY = -gloopDY;
+		gloopDY += speedchange;
+		gloopDirection = south;
+	}
+	//changes where the ball looks for an element based on the direction its moving in
+	if(gloopDirection == west){
+	    collideCheck = getElementAt(gloopball.getX() - gloopball.getRadius() - 1, gloopball.getY());
+	}
+	if(gloopDirection == east){
+	    collideCheck = getElementAt(gloopball.getX() + gloopball.getRadius() + 1, gloopball.getY());
+	}
+	if(gloopDirection == north){
+	    collideCheck = getElementAt(gloopball.getX(), gloopball.getY() - gloopball.getRadius() - 1);
+	} 
+	if(gloopDirection == south){
+	    collideCheck = getElementAt(gloopball.getX(), gloopball.getY() + gloopball.getRadius() + 1);
+	}
+}
+
+//what happens when the gloopball hits stuff
+function gloopCollision(){
+    //kinda just resets the round
+    if(collideCheck == heavy){
+        remove(gloopball);
+        scorecounter++;
+        remove(scoreboard);
+        score();
+        drawGloopball();
+        stopTimer(gloopballStuff);
+        gloopDX = 2;
+        gloopDY = 2;
+        setTimer(gloopballStuff, 20);
+        //powerups();
+    }
+    //resets the game, goes to end screen
+    if(collideCheck == princess){
+        gloopDX = gloopBaseSpeed;
+        gloopDY = gloopBaseSpeed;
+        endGame();
+    }
+}
+
+//what happens when the hero does drugs
+function pillPick(){
+    if(heavyDirection == north){
+        heavyCollide = getElementAt(heavy.getX(), heavy.getY() - heavy.getRadius() - 1);
+    }
+    if(heavyDirection == south){
+	    heavyCollide = getElementAt(heavy.getX(), heavy.getY() + heavy.getRadius() + 1);
+	}
+	if(heavyDirection == east){
+	    heavyCollide = getElementAt(heavy.getX() + heavy.getRadius() + 1, heavy.getY());
+	}
+	if(heavyDirection == west){
+	    heavyCollide = getElementAt(heavy.getX() - heavy.getRadius() - 1, heavy.getY());
+	}
+}
+
+//this function displays the start screen until the player presses E
+function startGame(){
+    var startScreen = new Rectangle(getWidth(), getHeight());
+    startScreen.setPosition(0, 0);
+    startScreen.setColor(Color.black);
+    var titleTxt = new Text("PROTECT THE PRINCESS", "24pt BRADLEY HAND ITC");
+    titleTxt.setPosition(getWidth() / 2 - titleTxt.getWidth() / 2, getHeight() / 2);
+    titleTxt.setColor(Color.red);
+    var startTxt = new Text("PRESS E TO PLAY", "14pt BRADLEY HAND ITC");
+    startTxt.setPosition(getWidth() / 2 - startTxt.getWidth() / 2, getHeight() / 2 + titleTxt.getHeight());
+    startTxt.setColor(Color.red);
+    add(startScreen);
+    add(titleTxt);
+    add(startTxt);
+    add(titleTxt);
+    add(startTxt);
+    var instructionTxtW = new Text("Press W to go up", "14pt BRADLEY HAND ITC");
+    instructionTxtW.setPosition(getWidth() / 2 - instructionTxtW.getWidth() * 1.25, startTxt.getY() + instructionTxtW.getHeight() * 2);
+    instructionTxtW.setColor(Color.red);
+    add(instructionTxtW);
+    add(instructionTxtW);
+    var instructionTxtS = new Text("Press S to go down", "14pt BRADLEY HAND ITC");
+    instructionTxtS.setPosition(getWidth() / 2 - instructionTxtS.getWidth() * 1.25, instructionTxtW.getY() + instructionTxtS.getHeight() * 2);
+    instructionTxtS.setColor(Color.red);
+    add(instructionTxtS);
+    add(instructionTxtS);
+    var instructionTxtA = new Text("Press A to go right", "14pt BRADLEY HAND ITC");
+    instructionTxtA.setPosition(getWidth() / 2, startTxt.getY() + instructionTxtA.getHeight() * 2);
+    instructionTxtA.setColor(Color.red);
+    add(instructionTxtA);
+    add(instructionTxtA);
+    var instructionTxtD = new Text("Press D to go left", "14pt BRADLEY HAND ITC");
+    instructionTxtD.setPosition(getWidth() / 2, instructionTxtW.getY() + instructionTxtS.getHeight() * 2);
+    instructionTxtD.setColor(Color.red);
+    add(instructionTxtD);
+    add(instructionTxtD);
+    var instructionTxtPills = new Text("Hint: Drugs make you more powerful. TEST THEM OUT!", "12pt BRADLEY HAND ITC");
+    instructionTxtPills.setPosition(getWidth() / 2 - instructionTxtPills.getWidth() / 2, 0 + instructionTxtPills.getHeight() * 2);
+    instructionTxtPills.setColor(Color.red);
+    add(instructionTxtPills);
+    add(instructionTxtPills);
+    add(instructionTxtPills);
+    var instructionTxtBounce = new Text("Hint: Gloop gets faster the more it bounces!", "12pt BRADLEY HAND ITC");
+    instructionTxtBounce.setPosition(getWidth() / 2 - instructionTxtBounce.getWidth() / 2, instructionTxtPills.getY() + instructionTxtBounce.getHeight() * 2);
+    instructionTxtBounce.setColor(Color.red);
+    add(instructionTxtBounce);
+    add(instructionTxtBounce);
+    add(instructionTxtBounce);
+    var objectiveTxt = new Text("Don't let the troll's gloop touch the beautiful princess!", "13pt BRADLEY HAND ITC");
+    objectiveTxt.setPosition(getWidth() / 2 - objectiveTxt.getWidth() / 2, instructionTxtD.getY() + objectiveTxt.getHeight() * 4);
+    objectiveTxt.setColor(Color.red);
+    add(objectiveTxt);
+    add(objectiveTxt);
+    add(objectiveTxt);
+}
+
+//this function displays the end screen when the game ends
+function endGame(){
+    var endScreen = new Rectangle(getWidth(), getHeight());
+    endScreen.setPosition(0, 0);
+    endScreen.setColor(Color.black);
+    var titleTxt = new Text("PROTECT THE PRINCESS", "24pt BRADLEY HAND ITC");
+    titleTxt.setPosition(getWidth() / 2 - titleTxt.getWidth() / 2, getHeight() / 2);
+    titleTxt.setColor(Color.red);
+    var endTxt = new Text("YOU FAILED TO", "14pt BRADLEY HAND ITC");
+    endTxt.setPosition(getWidth() / 2 - endTxt.getWidth() / 2, getHeight() / 2 - titleTxt.getHeight());
+    endTxt.setColor(Color.red);
+    var restartInstruction = new Text("PRESS E TO REDEEM YOUR FAILIURE", "14pt BRADLEY HAND ITC");
+    restartInstruction.setPosition(getWidth() / 2 - restartInstruction.getWidth() / 2, getHeight() / 2 + titleTxt.getHeight());
+    restartInstruction.setColor(Color.red);
+    add(endScreen);
+    add(titleTxt);
+    add(restartInstruction);
+    add(endTxt);
+    stopTimer(gloopballStuff);
+    gameEnd = true;
+    scorecounter = 0;
+}
